@@ -1,6 +1,8 @@
 const SUPABASE_URL = "https://cxnyrxagqjjzoudsyjyi.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bnlyeGFncWpqem91ZHN5anlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NDU5MDMsImV4cCI6MjA5MzQyMTkwM30.3oTqDFRFSX76jWqPxum8bWFtCkdw3FC9SH1Xp6QSNS4";
-const RESEND_KEY = "re_fmtJvozo_G9jyVwTXbiajYFyxHCb6V8sW";
+const EMAILJS_SERVICE_ID  = "service_hng5vsc";
+const EMAILJS_TEMPLATE_ID = "template_r8xt6qt";
+const EMAILJS_PUBLIC_KEY  = "rk1i8fZPtEjeE64w5";
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -186,27 +188,14 @@ form.addEventListener("submit", async (e) => {
 
 async function enviarCorreoBienvenida(emailDestino, username) {
     try {
-        await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${RESEND_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                from: "onboarding@resend.dev",
-                to: emailDestino,
-                subject: "¡Bienvenido/a!",
-                html: `
-                    <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px;">
-                        <p style="font-size: 18px;">La buena manito, gracias por crear la cuenta, te queremos</p>
-                        <br>
-                        <p style="font-size: 16px;">att: Santiago y Valeria</p>
-                    </div>
-                `
-            })
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            email_destino: emailDestino,
+            username: username
         });
+        console.log("Correo de bienvenida enviado a:", emailDestino);
     } catch (err) {
-        console.warn("No se pudo enviar el correo de bienvenida:", err.message);
+        console.warn("No se pudo enviar el correo de bienvenida:", err);
     }
 }
 
