@@ -1,0 +1,429 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --fondo: #0a0a0f;
+    --card-bg: #111118;
+    --card-border: #2a2a3d;
+    --acento: #c8ff00;
+    --acento2: #7f5af0;
+    --texto: #e8e8f0;
+    --texto-suave: #7a7a9a;
+    --input-bg: #1a1a28;
+    --input-border: #2e2e48;
+    --input-focus: #c8ff00;
+    --error: #ff4d6d;
+    --exito: #2cb67d;
+    --radio: 14px;
+    --sombra: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+body {
+    background-color: var(--fondo);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--texto);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ── Formas de fondo ── */
+.bg-shapes {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+}
+
+.s1 {
+    width: 520px;
+    height: 520px;
+    background: var(--acento2);
+    top: -160px;
+    left: -180px;
+    animation: drift1 12s ease-in-out infinite alternate;
+}
+
+.s2 {
+    width: 380px;
+    height: 380px;
+    background: var(--acento);
+    bottom: -120px;
+    right: -100px;
+    animation: drift2 15s ease-in-out infinite alternate;
+}
+
+.s3 {
+    width: 250px;
+    height: 250px;
+    background: #f72585;
+    top: 50%;
+    left: 60%;
+    animation: drift1 10s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes drift1 {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+
+    to {
+        transform: translate(40px, 30px) scale(1.1);
+    }
+}
+
+@keyframes drift2 {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+
+    to {
+        transform: translate(-30px, -40px) scale(1.08);
+    }
+}
+
+/* ── Card ── */
+.card {
+    position: relative;
+    z-index: 1;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 48px 44px 40px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: var(--sombra);
+    animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ── Header ── */
+.card-header {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.logo-icon {
+    font-size: 2rem;
+    color: var(--acento);
+    line-height: 1;
+    margin-bottom: 10px;
+    animation: spin 8s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.titulo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.6rem;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 30%, var(--acento) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitulo {
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+}
+
+/* ── Campos ── */
+.campo {
+    margin-bottom: 22px;
+    animation: fadeIn 0.5s ease both;
+}
+
+.campo:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.campo:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.campo:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+    margin-bottom: 8px;
+}
+
+.input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.icono {
+    position: absolute;
+    left: 14px;
+    font-size: 1rem;
+    color: var(--texto-suave);
+    pointer-events: none;
+    transition: color 0.2s;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    border-radius: var(--radio);
+    padding: 13px 14px 13px 42px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--texto);
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.2s;
+    caret-color: var(--acento);
+}
+
+input::placeholder {
+    color: #3e3e58;
+}
+
+input:focus {
+    border-color: var(--input-focus);
+    background: #1e1e2e;
+    box-shadow: 0 0 0 3px rgba(200, 255, 0, 0.12);
+}
+
+input:focus+.icono,
+.input-wrap:focus-within .icono {
+    color: var(--acento);
+}
+
+/* ── Botón ojo contraseña ── */
+.toggle-pass {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--texto-suave);
+    padding: 4px;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.toggle-pass:hover {
+    color: var(--acento);
+}
+
+/* ── Barra de fuerza de contraseña ── */
+.pass-strength {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.bar {
+    height: 4px;
+    flex: 1;
+    background: #2a2a3d;
+    border-radius: 99px;
+    transition: background 0.35s;
+}
+
+.bar.weak {
+    background: var(--error);
+}
+
+.bar.fair {
+    background: #f4a261;
+}
+
+.bar.good {
+    background: #43aa8b;
+}
+
+.bar.strong {
+    background: var(--acento);
+}
+
+/* ── Mensajes de error ── */
+.error-msg {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--error);
+    margin-top: 6px;
+    min-height: 16px;
+    padding-left: 2px;
+}
+
+/* ── Botón submit ── */
+.btn-submit {
+    width: 100%;
+    margin-top: 8px;
+    padding: 15px;
+    background: var(--acento);
+    color: #0a0a0f;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.14em;
+    border: none;
+    border-radius: var(--radio);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.18s, box-shadow 0.18s, background 0.2s;
+    box-shadow: 0 4px 24px rgba(200, 255, 0, 0.25);
+}
+
+.btn-submit::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.25) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+}
+
+.btn-submit:hover::before {
+    transform: translateX(100%);
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(200, 255, 0, 0.35);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Loader ── */
+.loader {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(0, 0, 0, 0.3);
+    border-top-color: #0a0a0f;
+    border-radius: 50%;
+    animation: spin-loader 0.7s linear infinite;
+}
+
+@keyframes spin-loader {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Mensaje global ── */
+.mensaje-global {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+.mensaje-global.exito {
+    background: rgba(44, 182, 125, 0.12);
+    border: 1px solid var(--exito);
+    color: var(--exito);
+}
+
+.mensaje-global.error-global {
+    background: rgba(255, 77, 109, 0.1);
+    border: 1px solid var(--error);
+    color: var(--error);
+}
+
+/* ── Footer ── */
+.footer-text {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+    margin-top: 24px;
+}
+
+.footer-text a {
+    color: var(--acento);
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.footer-text a:hover {
+    opacity: 0.75;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+    .card {
+        margin: 16px;
+        padding: 36px 24px 32px;
+    }
+
+    .titulo {
+        font-size: 2.8rem;
+    }
+}

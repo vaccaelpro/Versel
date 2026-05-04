@@ -1,0 +1,191 @@
+// =============================================
+// app.js — Lógica del formulario + Supabase
+// =============================================
+
+// ── 1. CONFIGURA TUS CREDENCIALES DE SUPABASE ──
+// Ve a: https://supabase.com → Tu proyecto → Settings → API
+const SUPABASE_URL = "https://cxnyrxagqjjzoudsyjyi.supabase.co"; // ← URL del proyecto
+const SUPABASE_KEY = "sb_publishable_NOLGOTJrZSFIPg7jwiMHTw_E-PH-crA";  // ← publishable key ✓                       // ← reemplaza esto (anon/public key)
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── 2. REFERENCIAS AL DOM ──
+const form = document.getElementById("registroForm");
+const inpUser = document.getElementById("username");
+const inpEmail = document.getElementById("email");
+const inpPass = document.getElementById("password");
+const togglePass = document.getElementById("togglePass");
+const btnSubmit = document.getElementById("btnSubmit");
+const btnText = document.getElementById("btnText");
+const btnLoader = document.getElementById("btnLoader");
+const msgGlobal = document.getElementById("mensajeGlobal");
+
+// ── 3. MOSTRAR / OCULTAR CONTRASEÑA ──
+togglePass.addEventListener("click", () => {
+    const esPassword = inpPass.type === "password";
+    inpPass.type = esPassword ? "text" : "password";
+    togglePass.textContent = esPassword ? "🙈" : "👁";
+});
+
+// ── 4. MEDIDOR DE FUERZA DE CONTRASEÑA ──
+inpPass.addEventListener("input", () => {
+    const val = inpPass.value;
+    const fuerza = calcularFuerza(val);
+    actualizarBarras(fuerza);
+});
+
+function calcularFuerza(pass) {
+    let score = 0;
+    if (pass.length >= 8) score++;
+    if (/[A-Z]/.test(pass)) score++;
+    if (/[0-9]/.test(pass)) score++;
+    if (/[^A-Za-z0-9]/.test(pass)) score++;
+    return score; // 0-4
+}
+
+function actualizarBarras(score) {
+    const bars = ["bar1", "bar2", "bar3", "bar4"];
+    const clases = ["", "weak", "fair", "good", "strong"];
+    const niveles = [
+        [],
+        ["weak"],
+        ["weak", "fair"],
+        ["weak", "fair", "good"],
+        ["weak", "fair", "good", "strong"]
+    ];
+
+    bars.forEach((id, i) => {
+        const bar = document.getElementById(id);
+        bar.className = "bar";
+        if (niveles[score][i]) bar.classList.add(niveles[score][i]);
+    });
+}
+
+// ── 5. VALIDACIÓN EN TIEMPO REAL ──
+inpUser.addEventListener("blur", () => validarCampo("username"));
+inpEmail.addEventListener("blur", () => validarCampo("email"));
+inpPass.addEventListener("blur", () => validarCampo("password"));
+
+function validarCampo(campo) {
+    const errores = {
+        username: document.getElementById("err-username"),
+        email: document.getElementById("err-email"),
+        password: document.getElementById("err-password"),
+    };
+
+    errores[campo].textContent = "";
+
+    if (campo === "username") {
+        if (!inpUser.value.trim()) {
+            errores.username.textContent = "El nombre de usuario es obligatorio.";
+            return false;
+        }
+        if (inpUser.value.trim().length < 3) {
+            errores.username.textContent = "Mínimo 3 caracteres.";
+            return false;
+        }
+    }
+
+    if (campo === "email") {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!inpEmail.value.trim()) {
+            errores.email.textContent = "El correo es obligatorio.";
+            return false;
+        }
+        if (!emailRegex.test(inpEmail.value.trim())) {
+            errores.email.textContent = "Ingresa un correo válido.";
+            return false;
+        }
+    }
+
+    if (campo === "password") {
+        if (!inpPass.value) {
+            errores.password.textContent = "La contraseña es obligatoria.";
+            return false;
+        }
+        if (inpPass.value.length < 8) {
+            errores.password.textContent = "Mínimo 8 caracteres.";
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function validarTodo() {
+    const u = validarCampo("username");
+    const e = validarCampo("email");
+    const p = validarCampo("password");
+    return u && e && p;
+}
+
+// ── 6. ENVÍO DEL FORMULARIO → SUPABASE ──
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!validarTodo()) return;
+
+    // Mostrar loader
+    btnText.style.display = "none";
+    btnLoader.style.display = "inline-block";
+    btnSubmit.disabled = true;
+    msgGlobal.style.display = "none";
+    msgGlobal.className = "mensaje-global";
+
+    const username = inpUser.value.trim();
+    const email = inpEmail.value.trim();
+    const password = inpPass.value;
+
+    try {
+        // a) Registrar usuario en Supabase Auth
+        const { data: authData, error: authError } = await db.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { username }  // metadata adicional
+            }
+        });
+
+        if (authError) throw authError;
+
+        // b) Guardar datos extra en tabla "usuarios" (si la creaste)
+        // Si no tienes la tabla, puedes comentar este bloque
+        const userId = authData.user?.id;
+        if (userId) {
+            const { error: dbError } = await db
+                .from("usuarios")
+                .insert([{ id: userId, username, email }]);
+
+            if (dbError) console.warn("No se pudo guardar en tabla usuarios:", dbError.message);
+        }
+
+        // Éxito
+        mostrarMensaje("¡Cuenta creada! Revisa tu correo para confirmarla. ✓", "exito");
+        form.reset();
+        actualizarBarras(0);
+
+    } catch (err) {
+        let msg = "Ocurrió un error. Inténtalo de nuevo.";
+        if (err.message.includes("already registered")) {
+            msg = "Este correo ya está registrado.";
+        } else if (err.message.includes("Password")) {
+            msg = "La contraseña no cumple los requisitos de seguridad.";
+        } else if (err.message.includes("Invalid")) {
+            msg = "Credenciales inválidas.";
+        }
+        mostrarMensaje(msg, "error-global");
+
+    } finally {
+        btnText.style.display = "inline";
+        btnLoader.style.display = "none";
+        btnSubmit.disabled = false;
+    }
+});
+
+// ── 7. HELPER: mostrar mensaje global ──
+function mostrarMensaje(texto, tipo) {
+    msgGlobal.textContent = texto;
+    msgGlobal.className = "mensaje-global " + tipo;
+    msgGlobal.style.display = "block";
+}
