@@ -195,15 +195,12 @@ async function enviarCorreoBienvenida(emailDestino, username) {
             body: JSON.stringify({
                 from: "onboarding@resend.dev",
                 to: emailDestino,
-                subject: "¡Bienvenido/a! 🎉",
+                subject: "¡Bienvenido/a!",
                 html: `
-                    <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px; background: #0a0a0f; color: #e8e8f0; border-radius: 12px;">
-                        <h2 style="color: #c8ff00; font-size: 28px; margin-bottom: 8px;">La buena manito, ${username}! 👋</h2>
-                        <p style="font-size: 16px; line-height: 1.6; color: #e8e8f0;">
-                            Gracias por crear la cuenta, te queremos 💛
-                        </p>
+                    <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px;">
+                        <p style="font-size: 18px;">La buena manito, gracias por crear la cuenta, te queremos</p>
                         <br>
-                        <p style="font-size: 14px; color: #7a7a9a;">Att: <strong style="color: #c8ff00;">Santiago y Valeria</strong></p>
+                        <p style="font-size: 16px;">att: Santiago y Valeria</p>
                     </div>
                 `
             })
