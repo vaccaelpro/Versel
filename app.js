@@ -1,10 +1,4 @@
-// =============================================
-// app.js — Lógica del formulario + Supabase
-// =============================================
-
-// ── 1. CONFIGURA TUS CREDENCIALES DE SUPABASE ──
-// Ve a: https://supabase.com → Tu proyecto → Settings → API
-const SUPABASE_URL = "https://cxnyrxagqjjzoudsyjyi.supabase.co"; // ← URL del proyecto
+const SUPABASE_URL = "https://cxnyrxagqjjzoudsyjyi.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bnlyeGFncWpqem91ZHN5anlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NDU5MDMsImV4cCI6MjA5MzQyMTkwM30.3oTqDFRFSX76jWqPxum8bWFtCkdw3FC9SH1Xp6QSNS4";  // ← publishable key ✓                       // ← reemplaza esto (anon/public key)
 
 const { createClient } = supabase;
@@ -120,7 +114,7 @@ function validarTodo() {
     return u && e && p;
 }
 
-// ── 6. ENVÍO DEL FORMULARIO → SUPABASE ──
+
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -166,13 +160,18 @@ form.addEventListener("submit", async (e) => {
         actualizarBarras(0);
 
     } catch (err) {
+        console.error("Error Supabase:", err.message, err);
         let msg = "Ocurrió un error. Inténtalo de nuevo.";
-        if (err.message.includes("already registered")) {
+        if (err.message.includes("already registered") || err.message.includes("already been registered")) {
             msg = "Este correo ya está registrado.";
+        } else if (err.message.includes("rate limit") || err.message.includes("429") || err.status === 429) {
+            msg = "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.";
         } else if (err.message.includes("Password")) {
             msg = "La contraseña no cumple los requisitos de seguridad.";
         } else if (err.message.includes("Invalid")) {
             msg = "Credenciales inválidas.";
+        } else if (err.message.includes("Email")) {
+            msg = "Correo electrónico inválido o no permitido.";
         }
         mostrarMensaje(msg, "error-global");
 
@@ -183,7 +182,6 @@ form.addEventListener("submit", async (e) => {
     }
 });
 
-// ── 7. HELPER: mostrar mensaje global ──
 function mostrarMensaje(texto, tipo) {
     msgGlobal.textContent = texto;
     msgGlobal.className = "mensaje-global " + tipo;
