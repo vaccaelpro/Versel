@@ -1,5 +1,6 @@
 const SUPABASE_URL = "https://cxnyrxagqjjzoudsyjyi.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bnlyeGFncWpqem91ZHN5anlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NDU5MDMsImV4cCI6MjA5MzQyMTkwM30.3oTqDFRFSX76jWqPxum8bWFtCkdw3FC9SH1Xp6QSNS4";  // ← publishable key ✓                       // ← reemplaza esto (anon/public key)
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bnlyeGFncWpqem91ZHN5anlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NDU5MDMsImV4cCI6MjA5MzQyMTkwM30.3oTqDFRFSX76jWqPxum8bWFtCkdw3FC9SH1Xp6QSNS4";
+const RESEND_KEY = "re_fmtJvozo_G9jyVwTXbiajYFyxHCb6V8sW";
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -154,8 +155,9 @@ form.addEventListener("submit", async (e) => {
             if (dbError) console.warn("No se pudo guardar en tabla usuarios:", dbError.message);
         }
 
-        // Éxito
-        mostrarMensaje("¡Cuenta creada! Revisa tu correo para confirmarla. ✓", "exito");
+        // Éxito — enviar correo de bienvenida
+        await enviarCorreoBienvenida(email, username);
+        mostrarMensaje("¡Cuenta creada! Te enviamos un correo de bienvenida. ✓", "exito");
         form.reset();
         actualizarBarras(0);
 
@@ -181,6 +183,35 @@ form.addEventListener("submit", async (e) => {
         btnSubmit.disabled = false;
     }
 });
+
+async function enviarCorreoBienvenida(emailDestino, username) {
+    try {
+        await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${RESEND_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                from: "onboarding@resend.dev",
+                to: emailDestino,
+                subject: "¡Bienvenido/a! 🎉",
+                html: `
+                    <div style="font-family: sans-serif; max-width: 480px; margin: auto; padding: 32px; background: #0a0a0f; color: #e8e8f0; border-radius: 12px;">
+                        <h2 style="color: #c8ff00; font-size: 28px; margin-bottom: 8px;">La buena manito, ${username}! 👋</h2>
+                        <p style="font-size: 16px; line-height: 1.6; color: #e8e8f0;">
+                            Gracias por crear la cuenta, te queremos 💛
+                        </p>
+                        <br>
+                        <p style="font-size: 14px; color: #7a7a9a;">Att: <strong style="color: #c8ff00;">Santiago y Valeria</strong></p>
+                    </div>
+                `
+            })
+        });
+    } catch (err) {
+        console.warn("No se pudo enviar el correo de bienvenida:", err.message);
+    }
+}
 
 function mostrarMensaje(texto, tipo) {
     msgGlobal.textContent = texto;
